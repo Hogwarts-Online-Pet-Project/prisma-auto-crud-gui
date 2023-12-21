@@ -18,7 +18,7 @@
             <th v-for="field in fieldsToShow" :key="`header_${field.name}`">
               {{ field.name }}
             </th>
-            <th>See</th>
+            <!-- <th>See</th> -->
           </tr>
         </thead>
         <tbody>
@@ -57,7 +57,11 @@ import { VSpacer } from "vuetify/components/VGrid";
 import NewItemDialog from "../components/NewItemDialog.vue";
 
 import { ref, onMounted, computed } from "vue";
-import axios from "axios";
+// import axios from "../utils/axios";
+
+import { getCurrentInstance } from 'vue'
+const app = getCurrentInstance()
+const axios = app.appContext.config.globalProperties.$axios
 
 const props = defineProps({
   items: Object,
@@ -74,7 +78,7 @@ onMounted(() => {
 
 const getFields = async () => {
   try {
-    const route = `/models/${props.table}`;
+    const route = `/crud/models/${props.table}/`;
     const { data } = await axios.get(route);
     fields.value = data.fields;
   } catch (error) {

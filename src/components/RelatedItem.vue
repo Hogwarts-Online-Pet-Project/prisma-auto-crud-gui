@@ -43,7 +43,11 @@ import { VBtn } from "vuetify/components/VBtn";
 
 import { ref, onMounted, computed } from "vue";
 import SetItemDialog from "./SetItemDialog.vue";
-import axios from "axios";
+// import axios from "../utils/axios";
+
+import { getCurrentInstance } from 'vue'
+const app = getCurrentInstance()
+const axios = app.appContext.config.globalProperties.$axios
 
 const props = defineProps({
   item: Object,
@@ -64,7 +68,7 @@ onMounted(() => {
 
 const getFields = async () => {
   try {
-    const route = `/models/${props.table}`;
+    const route = `/crud/models/${props.table}/`;
     const { data } = await axios.get(route);
     fields.value = data.fields;
   } catch (error) {

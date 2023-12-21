@@ -22,6 +22,12 @@
                 v-model="newItem[field.name]"
               />
               <v-text-field
+                v-else-if="['DateTime'].includes(field.type)"
+                :label="field.name"
+                v-model="newItem[field.name]"
+              />
+              <!-- TODO: APP SUPPORT FOR BOOL AND DATETIME -->
+              <v-text-field
                 v-else
                 disabled
                 persistent-hint
@@ -90,7 +96,11 @@ import Relateditem from "../components/RelatedItem.vue";
 
 import { ref, onMounted, computed, reactive } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+// import axios from "../utils/axios";
+
+import { getCurrentInstance } from 'vue'
+const app = getCurrentInstance()
+const axios = app.appContext.config.globalProperties.$axios
 
 const props = defineProps({
   table: String,
@@ -116,7 +126,7 @@ onMounted(() => {
 const getFields = async () => {
   fieldsLoading.value = true;
   try {
-    const route = `/models/${props.table}`;
+    const route = `/crud/models/${props.table}/`;
     const { data } = await axios.get(route);
     fields.value = data.fields;
   } catch (error) {
@@ -133,10 +143,10 @@ const primaryKeyField = computed(
 const createItem = async () => {
   creating.value = true;
   try {
-    const route = `/${props.table}`;
+    const route = `/crud/${props.table}/`;
     const { data } = await axios.post(route, newItem.value);
     router.push({
-      name: "item",
+      name: "admin_table_item",
       params: { table: props.table, primaryKey: data[primaryKeyField.value] },
     });
   } catch (error) {
