@@ -46,7 +46,11 @@ import { VTable } from "vuetify/components/VTable";
 import { VDialog } from "vuetify/components/VDialog";
 import { VBtn } from "vuetify/components/VBtn";
 
-import axios from "axios";
+// import axios from "../utils/axios";
+
+import { getCurrentInstance } from 'vue'
+const app = getCurrentInstance()
+const axios = app.appContext.config.globalProperties.$axios
 
 const total = ref(0);
 const items = ref([]);
@@ -69,7 +73,7 @@ onMounted(async () => {
 const getFields = async () => {
   fieldsLoading.value = true;
   try {
-    const route = `/models/${props.table}`;
+    const route = `/crud/models/${props.table}/`;
     const { data } = await axios.get(route);
     fields.value = data.fields;
   } catch (error) {
@@ -82,7 +86,7 @@ const getFields = async () => {
 const getItems = async () => {
   loading.value = true;
   try {
-    const route = `/${props.table}`;
+    const route = `/crud/${props.table}/`;
     const params = {};
     const { data } = await axios.get(route, { params });
 

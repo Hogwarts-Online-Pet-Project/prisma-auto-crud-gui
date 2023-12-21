@@ -3,17 +3,29 @@ import Items from "./views/Items.vue";
 import Item from "./views/Item.vue";
 
 import axios from "axios";
+import api, { set_instance } from './utils/axios'
 
 export default {
   install: (app, options) => {
     const { router, apiUrl } = options;
-
-    axios.defaults.baseURL = apiUrl;
-
+    set_instance(app.config.globalProperties.$axios)
+    // axios.defaults.baseURL = apiUrl;
     const routes = [
-      { name: "tables", path: "/tables", component: Tables },
-      { name: "items", path: "/:table", component: Items },
-      { name: "item", path: "/:table/:primaryKey", component: Item },
+      {
+        path: "/admin/tables",
+        component: Tables,
+        name: "admin_tables"
+      },
+      {
+        path: "/admin/:table",
+        component: Items,
+        name: "admin_single_table"
+      },
+      {
+        path: "/admin/:table/:primaryKey",
+        component: Item,
+        name: "admin_table_item"
+      },
     ];
 
     routes.forEach(router.addRoute);

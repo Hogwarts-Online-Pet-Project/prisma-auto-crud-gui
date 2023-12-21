@@ -1,7 +1,7 @@
 <template>
   <v-card :loading="loading">
     <v-toolbar flat>
-      <v-btn icon="mdi-arrow-left" :to="{ name: 'tables' }" />
+      <v-btn icon="mdi-arrow-left" :to="{ name: 'admin_tables' }" />
       <v-toolbar-title>{{ table }}</v-toolbar-title>
       <v-spacer />
       <NewItemDialog :table="table" />
@@ -12,7 +12,7 @@
         <thead>
           <tr>
             <th v-for="field in primitiveFields" :key="`header_${field.name}`">
-              <th class="text-left">See</th>
+              <!-- <th class="text-left">See</th> -->
               <v-btn
                 variant="text"
                 class="text-capitalize"
@@ -32,7 +32,7 @@
                 v-if="primaryKeyField"
                 icon="mdi-arrow-right"
                 :to="{
-                  name: 'item',
+                  name: 'admin_table_item',
                   params: { table, primaryKey: item[primaryKeyField] },
                 }"
                 flat
@@ -65,7 +65,12 @@ import TablePagination from "../components/TablePagination.vue";
 
 import { useRoute, useRouter } from "vue-router";
 import { ref, onMounted, computed, watch } from "vue";
-import axios from "axios";
+// import axios from "../utils/axios";
+
+import { getCurrentInstance } from 'vue'
+const app = getCurrentInstance()
+const axios = app.appContext.config.globalProperties.$axios
+
 
 const route = useRoute();
 const router = useRouter();
@@ -133,7 +138,7 @@ watch(query, () => {
 const getItems = async () => {
   loading.value = true;
   try {
-    const route = `/${table.value}`;
+    const route = `/crud/${table.value}/`;
     const params = { ...query.value };
     const { data } = await axios.get(route, { params });
 
@@ -148,7 +153,7 @@ const getItems = async () => {
 
 const getFields = async () => {
   try {
-    const route = `/models/${table.value}`;
+    const route = `/crud/models/${table.value}/`;
     const { data } = await axios.get(route);
     fields.value = data.fields;
   } catch (error) {

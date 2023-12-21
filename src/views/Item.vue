@@ -6,12 +6,7 @@
       <v-spacer />
       <v-btn @click="updateItem" icon="mdi-content-save" :loading="updating" />
 
-      <v-btn
-        @click="deleteItem()"
-        icon="mdi-delete"
-        color="error"
-        :loading="deleting"
-      />
+      <v-btn @click="deleteItem()" icon="mdi-delete" color="error" :loading="deleting" />
     </v-toolbar>
     <template v-if="item">
       <!-- Properties of the item itself -->
@@ -22,17 +17,10 @@
       </v-card-text>
 
       <v-card-text>
-        <v-row
-          v-for="{ name, type } in primitiveFieldsWithoutForeignKeys"
-          :key="name"
-        >
+        <v-row v-for="{ name, type } in primitiveFieldsWithoutForeignKeys" :key="name">
           <v-col>
-            <v-text-field
-              v-if="['Int', 'Float'].includes(type)"
-              :label="name"
-              type="number"
-              v-model.number="item[name]"
-            />
+            <v-text-field v-if="['Int', 'Float'].includes(type)" :label="name" type="number"
+              v-model.number="item[name]" />
 
             <v-text-field v-else :label="name" v-model="item[name]" />
           </v-col>
@@ -43,47 +31,32 @@
       <v-card-text>
         <h3>This {{ table }} to One relationships</h3>
       </v-card-text>
-      <v-card-text
-        v-for="{
-          name,
-          relationFromFields,
-          relationToFields,
-        } in fieldsWithForeignKeys"
-        :key="name"
-      >
-        <Relateditem
-          :table="name"
-          :item="item[name]"
-          @delete="
-            updateRelatedItem(relationFromFields[0], null, relationToFields[0])
-          "
-          @update="
-            updateRelatedItem(
-              relationFromFields[0],
-              $event,
-              relationToFields[0]
-            )
-          "
-        />
+      <v-card-text v-for="{
+        name,
+        relationFromFields,
+        relationToFields,
+      } in fieldsWithForeignKeys" :key="name">
+        <Relateditem :table="name" :item="item[name]" @delete="
+          updateRelatedItem(relationFromFields[0], null, relationToFields[0])
+          " @update="
+    updateRelatedItem(
+      relationFromFields[0],
+      $event,
+      relationToFields[0]
+    )
+    " />
       </v-card-text>
       <v-card-text v-if="!fieldsWithForeignKeys.length"> None </v-card-text>
 
       <v-card-text>
         <h3>This {{ table }} to Many relationships</h3>
       </v-card-text>
-      <v-card-text
-        v-for="{
-          name,
-          relationFromFields,
-          relationToFields,
-        } in fieldsFromOtherTables"
-        :key="name"
-      >
-        <RelatedItemsTable
-          :items="item[name]"
-          :table="name"
-          :currentTable="table"
-        />
+      <v-card-text v-for="{
+        name,
+        relationFromFields,
+        relationToFields,
+      } in fieldsFromOtherTables" :key="name">
+        <RelatedItemsTable :items="item[name]" :table="name" :currentTable="table" />
       </v-card-text>
       <v-card-text v-if="!fieldsFromOtherTables.length"> None </v-card-text>
     </template>
@@ -110,7 +83,12 @@ import { useRoute, useRouter } from "vue-router";
 import { ref, onMounted, computed, reactive, watch } from "vue";
 import RelatedItemsTable from "../components/RelatedItemsTable.vue";
 import Relateditem from "../components/RelatedItem.vue";
-import axios from "axios";
+// import axios from "../utils/axios";
+
+import { getCurrentInstance } from 'vue'
+const app = getCurrentInstance()
+const axios = app.appContext.config.globalProperties.$axios
+
 
 const route = useRoute();
 const router = useRouter();
@@ -142,7 +120,7 @@ const getItem = async () => {
   item.value = null;
   loading.value = true;
   try {
-    const route = `/${table.value}/${primaryKey.value}`;
+    const route = `/crud/${table.value}/${primaryKey.value}/`;
     const params = { includes: fieldsToInclude.value.map((f) => f.name) };
     const { data } = await axios.get(route, { params });
     item.value = data;
@@ -155,7 +133,7 @@ const getItem = async () => {
 
 const getModel = async () => {
   try {
-    const route = `/models/${table.value}`;
+    const route = `/crud/models/${table.value}/`;
     const { data } = await axios.get(route);
     fields.value = data.fields;
   } catch (error) {
@@ -166,7 +144,7 @@ const getModel = async () => {
 const updateItem = async () => {
   updating.value = true;
   try {
-    const route = `/${table.value}/${primaryKey.value}`;
+    const route = `/crud/${table.value}/${primaryKey.value}/`;
 
     const body = primitiveFields.value.reduce(
       (prev, { name }) => ({ ...prev, [name]: item.value[name] }),
@@ -189,9 +167,9 @@ const deleteItem = async () => {
   if (!confirm(`Delete ${table.value} ${primaryKey.value}?`)) return;
   deleting.value = true;
   try {
-    const route = `/${table.value}/${primaryKey.value}`;
+    const route = `/crud/${table.value}/${primaryKey.value}/`;
     await axios.delete(route);
-    router.push({ name: "items", param: { table: table.value } });
+    router.push({ name: "admin_single_table", param: { table: table.value } });
   } catch (error) {
     console.error(error);
     snackbar.show = true;
